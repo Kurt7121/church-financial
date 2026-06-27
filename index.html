@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Church Financial System</title>
+
+<style>
+body{
+font-family:Arial;
+background:#eee;
+padding:20px;
+}
+
+.container{
+background:white;
+padding:20px;
+border-radius:10px;
+max-width:1100px;
+margin:auto;
+}
+
+button{
+padding:10px;
+margin:5px;
+background:green;
+color:white;
+border:none;
+cursor:pointer;
+}
+
+.red{
+background:red;
+}
+
+input{
+padding:10px;
+margin:5px;
+}
+
+.hidden{
+display:none;
+}
+
+.card{
+display:inline-block;
+background:#ddd;
+padding:20px;
+margin:10px;
+border-radius:10px;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:20px;
+}
+
+th,td{
+border:1px solid black;
+padding:10px;
+text-align:center;
+}
+</style>
+
+</head>
+
+<body>
+
+
+<div class="container" id="loginPage">
+
+<h1>⛪ Church Login</h1>
+
+<input id="username" placeholder="Username">
+<br>
+
+<input id="password" type="password" placeholder="Password">
+<br>
+
+<button onclick="login()">LOGIN</button>
+
+<p id="error"></p>
+
+</div>
+
+
+
+
+
+<div class="container hidden" id="systemPage">
+
+
+<h1>Church Financial System</h1>
+
+
+<button onclick="openPage('dashboard')">Dashboard</button>
+<button onclick="openPage('incomePage')">Income</button>
+<button onclick="openPage('expensePage')">Expenses</button>
+<button class="red" onclick="logout()">Logout</button>
+
+
+
+
+
+<div id="dashboard">
+
+<h2>Dashboard</h2>
+
+<div class="card">
+<h3>Total Income</h3>
+<h2 id="incomeTotal">₱0</h2>
+</div>
+
+<div class="card">
+<h3>Total Expense</h3>
+<h2 id="expenseTotal">₱0</h2>
+</div>
+
+<div class="card">
+<h3>Balance</h3>
+<h2 id="balance">₱0</h2>
+</div>
+
+</div>
+
+
+
+
+
+
+<div id="incomePage" class="hidden">
+
+<h2>Income Records</h2>
+
+
+<input type="date" id="incomeDate">
+
+<input id="incomeName" placeholder="Source">
+
+<input type="number" id="incomeAmount" placeholder="Amount">
+
+
+<button onclick="addIncome()">SAVE</button>
+
+
+
+<h3>Search Income</h3>
+
+From:
+<input type="date" id="incomeFrom">
+
+To:
+<input type="date" id="incomeTo">
+
+<button onclick="searchIncome()">SEARCH</button>
+
+
+<h3>
+Total Search Income:
+<span id="incomeSearchTotal">₱0</span>
+</h3>
+
+
+<table>
+
+<tr>
+<th>Date</th>
+<th>Source</th>
+<th>Amount</th>
+<th>Action</th>
+</tr>
+
+<tbody id="incomeRecords"></tbody>
+
+</table>
+
+
+</div>
+
+
+
+
+
+
+
+
+<div id="expensePage" class="hidden">
+
+<h2>Expense Records</h2>
+
+
+<input type="date" id="expenseDate">
+
+<input id="expenseName" placeholder="Expense">
+
+<input id="buyer" placeholder="Purchased By">
+
+<input type="number" id="expenseAmount" placeholder="Amount">
+
+
+<button onclick="addExpense()">SAVE</button>
+
+
+
+
+<h3>Search Expense</h3>
+
+From:
+<input type="date" id="expenseFrom">
+
+To:
+<input type="date" id="expenseTo">
+
+
+<button onclick="searchExpense()">SEARCH</button>
+
+
+<h3>
+Total Search Expense:
+<span id="expenseSearchTotal">₱0</span>
+</h3>
+
+
+
+<table>
+
+<tr>
+<th>Date</th>
+<th>Expense</th>
+<th>Person</th>
+<th>Amount</th>
+<th>Action</th>
+</tr>
+
+
+<tbody id="expenseRecords"></tbody>
+
+
+</table>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+<script>
+
+
+let income =
+JSON.parse(localStorage.getItem("income")) || [];
+
+
+let expenses =
+JSON.parse(localStorage.getItem("expenses")) || [];
+
+
+
+
+
+function login(){
+
+let u=document.getElementById("username").value;
+let p=document.getElementById("password").value;
+
+
+if(u=="ruby" && p=="1988"){
+
+loginPage.style.display="none";
+
+systemPage.classList.remove("hidden");
+
+updateDashboard();
+
+}
+
+else{
+
+error.innerHTML="Wrong username/password";
+
+}
+
+}
+
+
+
+
+
+function logout(){
+
+location.reload();
+
+}
+
+
+
+
+
+function openPage(page){
+
+dashboard.style.display="none";
+incomePage.style.display="none";
+expensePage.style.display="none";
+
+
+document.getElementById(page).style.display="block";
+
+
+}
+
+
+
+
+
+
+
+function addIncome(){
+
+
+income.push({
+
+id:Date.now(),
+
+date:incomeDate.value,
+
+name:incomeName.value,
+
+amount:Number(incomeAmount.value)
+
+});
+
+
+localStorage.setItem(
+"income",
+JSON.stringify(income)
+);
+
+
+
+incomeDate.value="";
+incomeName.value="";
+incomeAmount.value="";
+
+
+showIncome();
+updateDashboard();
+
+
+}
+
+
+
+
+
+
+
+function addExpense(){
+
+
+expenses.push({
+
+id:Date.now(),
+
+date:expenseDate.value,
+
+name:expenseName.value,
+
+buyer:buyer.value,
+
+amount:Number(expenseAmount.value)
+
+});
+
+
+localStorage.setItem(
+"expenses",
+JSON.stringify(expenses)
+);
+
+
+
+expenseDate.value="";
+expenseName.value="";
+buyer.value="";
+expenseAmount.value="";
+
+
+showExpense();
+updateDashboard();
+
+
+}
+
+
+
+
+
+
+
+function deleteIncome(id){
+
+income=income.filter(x=>x.id!=id);
+
+localStorage.setItem(
+"income",
+JSON.stringify(income)
+);
+
+showIncome();
+updateDashboard();
+
+}
+
+
+
+
+
+
+
+function deleteExpense(id){
+
+expenses=expenses.filter(x=>x.id!=id);
+
+localStorage.setItem(
+"expenses",
+JSON.stringify(expenses)
+);
+
+showExpense();
+updateDashboard();
+
+}
+
+
+
+
+
+
+
+function showIncome(){
+
+let html="";
+
+
+income.forEach(x=>{
+
+
+html+=`
+
+<tr>
+<td>${x.date}</td>
+<td>${x.name}</td>
+<td>₱${x.amount}</td>
+
+<td>
+<button onclick="deleteIncome(${x.id})">
+Delete
+</button>
+</td>
+
+</tr>
+
+`;
+
+});
+
+
+incomeRecords.innerHTML=html;
+
+
+}
+
+
+
+
+
+
+
+
+
+function showExpense(){
+
+let html="";
+
+
+expenses.forEach(x=>{
+
+
+html+=`
+
+<tr>
+
+<td>${x.date}</td>
+
+<td>${x.name}</td>
+
+<td>${x.buyer}</td>
+
+<td>₱${x.amount}</td>
+
+<td>
+
+<button onclick="deleteExpense(${x.id})">
+Delete
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+});
+
+
+expenseRecords.innerHTML=html;
+
+
+}
+
+
+
+
+
+
+
+
+function searchIncome(){
+
+let from=new Date(incomeFrom.value);
+
+let to=new Date(incomeTo.value);
+
+
+let total=0;
+
+let html="";
+
+
+
+income.forEach(x=>{
+
+
+let d=new Date(x.date);
+
+
+
+if(d>=from && d<=to){
+
+
+total+=x.amount;
+
+
+html+=`
+
+<tr>
+
+<td>${x.date}</td>
+
+<td>${x.name}</td>
+
+<td>₱${x.amount}</td>
+
+
+<td>
+
+<button onclick="deleteIncome(${x.id})">
+Delete
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+}
+
+});
+
+
+
+incomeRecords.innerHTML=html;
+
+incomeSearchTotal.innerHTML="₱"+total;
+
+
+}
+
+
+
+
+
+
+
+
+function searchExpense(){
+
+
+let from=new Date(expenseFrom.value);
+
+let to=new Date(expenseTo.value);
+
+
+
+let total=0;
+
+let html="";
+
+
+
+expenses.forEach(x=>{
+
+
+let d=new Date(x.date);
+
+
+
+if(d>=from && d<=to){
+
+
+total+=x.amount;
+
+
+html+=`
+
+<tr>
+
+<td>${x.date}</td>
+
+<td>${x.name}</td>
+
+<td>${x.buyer}</td>
+
+<td>₱${x.amount}</td>
+
+
+<td>
+
+<button onclick="deleteExpense(${x.id})">
+Delete
+</button>
+
+</td>
+
+</tr>
+
+`;
+
+}
+
+});
+
+
+
+expenseRecords.innerHTML=html;
+
+
+expenseSearchTotal.innerHTML="₱"+total;
+
+
+}
+
+
+
+
+
+
+
+function updateDashboard(){
+
+
+let ti=0;
+let te=0;
+
+
+income.forEach(x=>ti+=x.amount);
+
+expenses.forEach(x=>te+=x.amount);
+
+
+
+incomeTotal.innerHTML="₱"+ti;
+
+expenseTotal.innerHTML="₱"+te;
+
+balance.innerHTML="₱"+(ti-te);
+
+
+}
+
+
+
+</script>
+
+</body>
+</html>
